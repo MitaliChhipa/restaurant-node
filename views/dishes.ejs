@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dishes</title>
+</head>
+<body>
+    <table>
+        <thead>
+          <tr>
+            <th>Dish Name</th>
+            <th>Quantity</th>
+            <th>Edit</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+            <% dishes.forEach(function(dish) { %>
+                <tr data-id="<%= dish.id %>">
+                  <td><%= dish.dishName %></td>
+                  <td><%= dish.quantity %></td>
+                  <td><button class="edit-button" data-id="<%= dish.id %>">Edit</button></td>
+                  <td><button class="delete-button" data-id="<%= dish.id %>">Delete</button></td>
+                </tr>
+              <% }); %>
+        </tbody>
+      </table>
+      <button class="add-button">Add</button>
+        <form id="dish-form">
+            <label>dish name</label>
+            <input type="text" name="dishName" required>
+            <label>quantity</label>
+            <input type="number" name="quantity" required>
+            <button class="submit-button">submit</button>
+        </form>
+   
+    <style>
+         #dish-form {
+            display: none; 
+        }
+    </style>
+      <script>
+        let currentId=null;
+        let currentAction = null;
+         document.addEventListener("DOMContentLoaded", function() {
+        // Handle Delete Button Click
+        document.querySelectorAll(".delete-button").forEach(function(button) {
+            button.addEventListener("click", function() {
+            const dishId = this.getAttribute("data-id");
+
+            fetch(`/dish/${dishId}`, {
+            method: 'delete',
+            }).then(html => {
+                location.reload(true); 
+            })
+            })})
+        document.querySelectorAll(".edit-button").forEach(function(button){
+            button.addEventListener("click", function(){
+                currentId=this.getAttribute("data-id");
+                currentAction='put'   
+                document.getElementById("dish-form").style.display = 'block';
+            })
+        })
+        document.querySelector(".add-button").addEventListener("click",function(){
+            currentId=null;
+            currentAction='post'
+            document.getElementById("dish-form").style.display = 'block';
+        })
+       document.getElementById("dish-form").addEventListener("submit",function(event){
+        event.preventDefault(); 
+        //const formData = new FormData(document.querySelector('form'))
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+            if(currentId){
+                fetch(`/dish/${currentId}`,{
+               method: 'put',
+               headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+           }).then(response => {
+            if (!response.ok) {
+                return response.json().then(error => {
+                    throw new Error(error.msg);
+                });
+            }
+            return ;
+            }
+            ).then(html => {
+                location.reload(true); 
+            }).catch(error => {
+            alert(error.message); // error message
+            });
+            }
+            else{
+                fetch('/dish',{
+               method: 'post',
+               headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+           }).then(response => {
+            if (!response.ok) {
+                return response.json().then(error => {
+                    throw new Error(error.msg);
+                });
+            }
+            return ;
+            }
+            ).then(html => {
+                location.reload(true); 
+            }).catch(error => {
+            alert(error.message); // error message
+            });
+            }
+        document.getElementById("dish-form").style.display = 'none';
+        console.log('submit done')
+           
+        })
+         })
+      </script>
+</body>
+</html>
