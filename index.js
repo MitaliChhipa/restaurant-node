@@ -8,7 +8,7 @@ const orderRoute = require('./routes/order')
 const staticRouter = require('./routes/staticRoute')
 const userRoute = require('./routes/user');
 const cookieParser = require('cookie-parser');
-const {restrictToLoggedinUserOnly} = require('./middleware/auth')
+const {restrictToLoggedinUserOnly, allowToUser} = require('./middleware/auth')
 
 setConnection("mongodb+srv://mitalichhipa:xJcUsu3kw9n4Xa5G@cluster0.gp7a8.mongodb.net/restaurant?retryWrites=true&w=majority&appName=Cluster0");
 
@@ -20,8 +20,8 @@ app.set("view engine","ejs");
 app.set("views",path.resolve("./views"))
 
 
-app.use('/dish',restrictToLoggedinUserOnly,dishRoute);
-app.use('/order',restrictToLoggedinUserOnly, orderRoute);
+app.use('/dish',restrictToLoggedinUserOnly,allowToUser(['ADMIN']),dishRoute);
+app.use('/order',restrictToLoggedinUserOnly,allowToUser(['USER','ADMIN']), orderRoute);
 app.use('/user',userRoute);
 app.use('/',staticRouter);
 

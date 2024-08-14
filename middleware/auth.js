@@ -12,4 +12,15 @@ async function restrictToLoggedinUserOnly(req, res, next) {
     next();
   }
 
-module.exports={restrictToLoggedinUserOnly}
+function allowToUser(roles){
+  return function (req,res,next){
+    try{
+      if(!req.user) return res.redirect("/login");
+      if(!roles.includes(req.user?.role)) return res.end('unauthorized');
+    next();
+    }catch(err){console.log(err)}
+    
+  }
+}
+
+module.exports={restrictToLoggedinUserOnly, allowToUser}
